@@ -18,7 +18,7 @@ const Onboarding = ({navigation}) => {
             Terms & Privacy Policy
           </Text>
         </Pressable>
-        <Pressable onPress={()=>navigation.navigate("PhoneRegister")} className="flex-row mx-10 justify-center items-center rounded-3xl bg-primary h-[50px]">
+        <Pressable onPress={()=>navigation.navigate("SignIn")} className="flex-row mx-10 justify-center items-center rounded-3xl bg-primary h-[50px]">
           <Text className="font-intersemibold text-white text-center">
             Get Started
           </Text>

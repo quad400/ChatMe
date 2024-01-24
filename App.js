@@ -1,13 +1,11 @@
-import { StatusBar } from 'expo-status-bar';
-import { FONTS } from './constants';
-import {useFonts} from "expo-font"
-import { NavigationContainer } from '@react-navigation/native';
-import MainNavigation from './navigations/MainNavigation';
-
+import { useFonts } from "expo-font";
+import { NavigationContainer } from "@react-navigation/native";
+import MainNavigation from "./navigations/MainNavigation";
+import { Provider } from "react-redux";
+import { store } from "./core/store";
+import Layout from "./screens/Layout";
 
 export default function App() {
-
-
   const [fontLoaded] = useFonts({
     InterBold: require("./assets/fonts/Inter-Bold.ttf"),
     InterMedium: require("./assets/fonts/Inter-Medium.ttf"),
@@ -19,9 +17,12 @@ export default function App() {
   if (!fontLoaded) return null;
 
   return (
-    <NavigationContainer>
-      <MainNavigation />
-    </NavigationContainer>
-
-    );
+    <Provider store={store}>
+      <Layout>
+        <NavigationContainer>
+          <MainNavigation />
+        </NavigationContainer>
+      </Layout>
+    </Provider>
+  );
 }

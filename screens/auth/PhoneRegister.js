@@ -8,6 +8,7 @@ import { Pressable } from "react-native";
 const PhoneRegister = ({ navigation }) => {
   const [show, setShow] = useState(false);
   const [countryCode, setCountryCode] = useState("+234");
+  const [flag, setFlag] = useState(null);
 
   return (
     <SafeAreaView className="flex-1 bg-white h-full w-full mt-4 px-3">
@@ -24,27 +25,28 @@ const PhoneRegister = ({ navigation }) => {
         <Text className="font-interregular text-[10px] mx-10 text-center text-gray40 mt-2">
           Please confirm your country code and enter your phone number
         </Text>
-        <View className="flex-row justify-center items-center mt-8">
+        <View className="flex-row justify-center items-center w-4/5 mt-8">
           <TouchableOpacity
             onPress={() => setShow(true)}
-            className="justify-center
-         items-center bg-slate-100 h-12 w-15 rounded-md shadow-sm"
+            className="flex-row justify-center
+         items-center bg-gray-50 h-12 px-2 rounded-md"
           >
-            {/* <Image  /> */}
-            <Text className="font-intermedium text-gray40 text-[12px] px-2">
+            <Text>{flag}</Text>
+
+            <Text className="font-interregular text-textColor text-[12px] pl-1">
               {countryCode}
             </Text>
           </TouchableOpacity>
           <View
             className="justify-center
-         items-center bg-slate-100 h-12 w-4/5 ml-2 rounded-md shadow-sm"
+         items-center bg-gray-50 h-12 w-full ml-2 rounded-md"
           >
             <TextInput
               keyboardType="number-pad"
               cursorColor="#404040"
               placeholder="Phone Number"
               autoCorrect={false}
-              className="font-interregular text-[12px] text-textColor bg-slate-100 w-full h-10 px-3"
+              className="font-interregular text-[12px] text-textColor bg-gray-50 w-full h-10 px-3"
             />
           </View>
         </View>
@@ -56,14 +58,29 @@ const PhoneRegister = ({ navigation }) => {
             Continue
           </Text>
         </Pressable>
-      </View>
       <CountryPicker
         show={show}
+        onBackdropPress={() => setShow(false)}
         pickerButtonOnPress={(item) => {
+          setFlag(item.flag);
           setCountryCode(item.dial_code);
           setShow(false);
         }}
+        style={{
+
+          modal: {
+            height: 300,
+          },
+          flag: {
+            height: 20,
+            width: 20,
+          },
+          textInput: {
+            fontFamily: "InterRegular",
+          },
+        }}
       />
+      </View>
     </SafeAreaView>
   );
 };

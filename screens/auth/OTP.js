@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Entypo } from "@expo/vector-icons";
 import { OtpInput } from "react-native-otp-entry";
-import { FONTS } from "../../constants/index";
+import { COLORS, FONTS } from "../../constants/index";
 
 const OTP = ({ navigation }) => {
 
@@ -31,7 +31,7 @@ const OTP = ({ navigation }) => {
         </Text>
         <OtpInput
           numberOfDigits={4}
-          focusColor="green"
+          focusColor={COLORS.textColor}
           focusStickBlinkingDuration={500}
           onTextChange={setCode}
           theme={{
@@ -41,7 +41,7 @@ const OTP = ({ navigation }) => {
               marginBottom: 50,
             },
             pinCodeContainerStyle: {
-              backgroundColor: "#40404010",
+              backgroundColor: "#40404005",
               borderWidth: 0,
             },
 
