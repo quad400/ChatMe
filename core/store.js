@@ -1,11 +1,9 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import userReducer from "../core/features/user";
-import conversationReducer from "../core/features/conversation";
 import chatReducer from "../core/features/chat";
 
 const rootReducer = combineReducers({
   user: userReducer,
-  conversation: conversationReducer,
   chat: chatReducer
 });
 

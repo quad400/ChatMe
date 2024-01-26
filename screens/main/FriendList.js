@@ -6,18 +6,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { getUserFriends } from "../../core/features/user";
 import { connectSocket, socket } from "../../socket";
 import {prettylog} from "../../core/utils"
-import {
-  AddDirectConversation,
-  ResetMessages,
-  SelectDirectConversation,
-  UpdateDirectConversation,
-} from "../../core/features/conversation";
 
 const FriendList = () => {
   const { friends, user } = useSelector((state) => state.user);
-  const { conversations } = useSelector(
-    (state) => state.conversation.direct_chat
-  );
   const dispatch = useDispatch();
 
   // useEffect(() => {
@@ -57,16 +48,12 @@ const FriendList = () => {
   }, [dispatch]);
 
   if (!friends) return;
-
-  // prettylog("friends: ",friends)
-
   return (
     <SafeAreaView className="bg-white w-full h-full">
       <View className="m-3">
         <Text className="text-lg text-black font-interbold mb-3">Friends</Text>
         <View className="mt-3">
           {friends?.friends?.map((friend, index) => {
-            // console.log("friend: ",friend)
             return <Friend key={index} friend={friend} />;
           })}
         </View>

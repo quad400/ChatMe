@@ -7,15 +7,9 @@ import { TextInput } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 
 import Friend from "../../components/Friend";
-import {
-  AddDirectConversation,
-  FetchAllChatList,
-  FetchDirectConversations,
-  SelectDirectConversation,
-  UpdateDirectConversation,
-} from "../../core/features/conversation";
+
 import { connectSocket, socket } from "../../socket";
-import { fetchFriends } from "../../core/features/chat";
+import { fetchFriends, updateFriendList } from "../../core/features/chat";
 
 const ChatHome = ({ navigation }) => {
   const { user, user_id } = useSelector((state) => state.user);
@@ -33,35 +27,25 @@ const ChatHome = ({ navigation }) => {
         connectSocket(user?._id);
       }
       if (socket) {
-        socket.on("user_chats", (data) => {
-          console.log("user chat");
-          dispatch(fetchFriends(data.chats));
+        //     console.log("fetcher")
+
+        socket.on("start_chat", (data) => {
+          console.log("fetc", data);
+          dispatch(updateFriendList(data));
         });
       }
     }
-
     return () => {
-      socket?.off("user_chats");
+      socket?.off("start_chat");
     };
   }, [socket, dispatch]);
 
   useEffect(() => {
-    // dispatch(FetchAllChatList());
-    if (!user) return;
-
-    if (user) {
-      if (!socket) {
-        connectSocket(user?._id);
-      }
-      if (socket) {
-        //     console.log("fetcher")
-        socket.emit("fetch_chats", { user_id: user?._id }, (data) => {
-          console.log("fetc", data);
-          dispatch(fetchFriends(data));
-        });
-      }
-    }
-  }, [socket, dispatch]);
+    socket.emit("fetch_chats", { user_id: user?._id }, (data) => {
+      console.log("fetc", data);
+      dispatch(fetchFriends(data));
+    });
+  }, []);
 
   // console.log(friends);
   return (

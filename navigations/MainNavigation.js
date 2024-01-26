@@ -7,9 +7,8 @@ import { useEffect } from "react";
 import { connectSocket, socket } from "../socket";
 import { useDispatch, useSelector } from "react-redux";
 import NewFriendRequests from "../screens/main/NewFriendRequests";
-import Chat from "../screens/main/Chat";
+// import Chat from "../screens/main/Chat";
 import FriendList from "../screens/main/FriendList";
-import { AddMessage } from "../core/features/conversation";
 import Message from "../screens/main/Message";
 import { fetchFriends } from "../core/features/chat";
 
@@ -17,9 +16,7 @@ const Stack = createStackNavigator();
 
 const MainNavigation = () => {
   const { authenticated, user } = useSelector((state) => state.user);
-  const { current_conversation } = useSelector(
-    (state) => state.conversation.direct_chat
-  );
+  
 
   const dispatch = useDispatch();
 
@@ -87,7 +84,6 @@ const MainNavigation = () => {
             name="NewFriendRequests"
             component={NewFriendRequests}
           />
-          <Stack.Screen name="Chat" component={Chat} />
           <Stack.Screen name="Message" component={Message} />
           <Stack.Screen name="FriendList" component={FriendList} />
         </Stack.Group>

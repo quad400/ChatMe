@@ -23,13 +23,23 @@ const slice = createSlice({
       state.messagesList = [...data.messages];
     },
 
+    updateMessageList: (state, action) => {
+      const message = action.payload;
+      state.messagesList = [...state.messagesList, message];
+    },
+
     fetchFriends: (state, action) => {
       state.friends = action.payload;
     },
 
     updateFriendList: (state, action) => {
       const friend = action.payload;
-      state.friends.push(friend);
+      state.friends.filter((el) => {
+        if (el._id === friend._id) {
+          return;
+        }
+        return [friend, ...state.friends];
+      });
     },
   },
 });
@@ -40,5 +50,6 @@ export const {
   fetchFriends,
   messageInfo,
   updateFriendList,
+  updateMessageList,
 } = slice.actions;
 export default slice.reducer;

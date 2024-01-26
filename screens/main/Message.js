@@ -17,6 +17,7 @@ import {
   messageList,
   responseMessageList,
   updateFriendList,
+  updateMessageList,
 } from "../../core/features/chat";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
@@ -47,17 +48,23 @@ function MessageBubble({ index, message, friend }) {
 
   //   console.log(message);
 
-  if (index === 0) {
-    if (showTyping) {
-      return <MessageBubbleFriend friend={friend} typing={true} />;
-    }
-    return;
-  }
+  // if (index === 0) {
+  //   if (showTyping) {
+  //     return (
+  //       <MessageBubbleFriend key={message} friend={friend} typing={true} />
+  //     );
+  //   }
+  //   return;
+  // }
 
   return message.user?._id === user?._id ? (
-    <MessageBubbleMe text={message.text} />
+    <MessageBubbleMe key={message._id} text={message.text} />
   ) : (
-    <MessageBubbleFriend text={message.text} friend={friend} />
+    <MessageBubbleFriend
+      key={message._id}
+      text={message.text}
+      friend={friend}
+    />
   );
 }
 
@@ -189,7 +196,7 @@ function MessageBubbleMe({ text }) {
             lineHeight: 18,
           }}
         >
-          {text}
+          {text} 
         </Text>
       </View>
     </View>
@@ -238,26 +245,25 @@ function MessageInput({ message, setMessage, onSend }) {
 
 const Message = ({ route }) => {
   const { friend } = route.params;
-
+  const [chat_id, setChat_id] = useState(null);
   const { user } = useSelector((state) => state.user);
   const [message, setMessage] = useState("");
 
-  const { messagesList, messagesUsername } = useSelector((state) => state.chat);
+  const { messagesList, friends } = useSelector((state) => state.chat);
   const dispatch = useDispatch();
 
-  console.log(chat_id);
-  let chat_id;
+  // console.log(messagesList)
 
   useEffect(() => {
+    console.log("want to run");
     socket.emit(
       "start_conversation",
       { from: user?._id, to: friend?._id },
       (chat) => {
-        chat_id = chat?._id;
         dispatch(updateFriendList(chat));
       }
     );
-  }, []);
+  }, [socket]);
 
   useEffect(() => {
     if (!user) return;
@@ -268,18 +274,27 @@ const Message = ({ route }) => {
       }
       dispatch(messageInfo(friend?.username));
 
-      const inputData = { from: user?._id, to: friend?._id };
-      socket.emit("get_messages", { inputData }, (data) => {
-        dispatch(responseMessageList(data));
+      socket.on("new_message", (data) => {
+        dispatch(updateMessageList(data.message));
+        // console.log(data)
       });
+
+      const inputData = { from: user?._id, to: friend?._id };
+      if (chat_id === null) {
+        socket.emit("get_messages", { inputData }, (data) => {
+          setChat_id(data?.chat_id);
+          dispatch(responseMessageList(data));
+        });
+      }
     }
+    return () => {
+      socket?.off("new_message");
+    };
   }, []);
 
+  console.log(chat_id);
   function onSend() {
-    const cleaned = message.replace(/\s+/g, " ").trim();
-    if (cleaned.length === 0) return;
     const uniqueId = generateUniqueId();
-    console.log("click");
     const toSend = {
       chat_id: chat_id,
       _id: uniqueId,
@@ -289,8 +304,22 @@ const Message = ({ route }) => {
       from: user?._id,
       to: friend?._id,
     };
-    socket.emit("text_message", { data: toSend });
+    socket.emit("text_message", { toSend });
     setMessage("");
+
+    const friendIndex = friends.findIndex(
+      (item) => item.friend.username === username
+    );
+    if (friendIndex >= 0) {
+      const item = friendList[friendIndex];
+      item.preview = data.message.text;
+      item.updated = data.message.created;
+      friendList.splice(friendIndex, 1);
+      friendList.unshift(item);
+      set((state) => ({
+        friendList: friendList,
+      }));
+    }
   }
 
   function onType(value) {
@@ -324,10 +353,10 @@ const Message = ({ route }) => {
         }}
         data={[...messagesList].reverse()}
         inverted={true}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item._id}
         renderItem={({ item, index }) => (
           <MessageBubble
-            key={index}
+            key={item?._id}
             index={index}
             message={item}
             friend={friend}
