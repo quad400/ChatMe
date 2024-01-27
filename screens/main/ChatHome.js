@@ -1,4 +1,4 @@
-import { View, Text } from "react-native";
+import { View, Text, Pressable, Image } from "react-native";
 import React, { useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
@@ -12,8 +12,8 @@ import { connectSocket, socket } from "../../socket";
 import { fetchFriends, updateFriendList } from "../../core/features/chat";
 
 const ChatHome = ({ navigation }) => {
-  const { user, user_id } = useSelector((state) => state.user);
-  const { friends } = useSelector((state) => state.chat);
+  const { user } = useSelector((state) => state.user);
+  const { friends, chat_id } = useSelector((state) => state.chat);
 
   const dispatch = useDispatch();
   // if(!conversations) return;
@@ -79,13 +79,31 @@ const ChatHome = ({ navigation }) => {
         {friends?.flatMap((chat) =>
           chat.participants
             .filter((participant) => participant._id !== user?._id)
-            .map((participant) => (
-              <Friend
-                key={participant?._id}
-                friend={participant}
-                chat_id={chat._id}
-              />
-            ))
+            .map((friend) => {
+              const chat_id = chat?._id;
+              return (
+                <Pressable
+                  key={chat?._id}
+                  onPress={() => {
+                    navigation.navigate("Message", { friend, chat_id });
+                  }}
+                  className="flex-row justify-between items-center rounded-md my-2 p-2"
+                >
+                  <View className="flex-row justify-normal items-center">
+                    <Image
+                      source={{ uri: friend?.picture }}
+                      className="h-[40px] w-[40px] rounded-full mr-3"
+                    />
+                    <View>
+                      <Text className="text-[16px] font-intermedium">
+                        {friend?.username}
+                      </Text>
+                      <Text>{chat.preview}</Text>
+                    </View>
+                  </View>
+                </Pressable>
+              );
+            })
         )}
       </View>
 

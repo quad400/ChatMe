@@ -13,6 +13,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { connectSocket, socket } from "../../socket";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  ResponseMessageList,
   messageInfo,
   messageList,
   responseMessageList,
@@ -22,7 +23,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { COLORS } from "../../constants";
-import { generateUniqueId } from "../../utils";
+import { formatTime, generateUniqueId } from "../../utils";
 
 function MessageBubble({ index, message, friend }) {
   const [showTyping, setShowTyping] = useState(false);
@@ -58,17 +59,22 @@ function MessageBubble({ index, message, friend }) {
   // }
 
   return message.user?._id === user?._id ? (
-    <MessageBubbleMe key={message._id} text={message.text} />
+    <MessageBubbleMe
+      key={message._id}
+      date={message.createdAt}
+      text={message.text}
+    />
   ) : (
     <MessageBubbleFriend
       key={message._id}
+      date={message.createdAt}
       text={message.text}
       friend={friend}
     />
   );
 }
 
-function MessageBubbleFriend({ text = "", friend, typing = false }) {
+function MessageBubbleFriend({ text = "", date, friend, typing = false }) {
   //   console.log(friend?.picture);
   return (
     <View
@@ -101,15 +107,28 @@ function MessageBubbleFriend({ text = "", friend, typing = false }) {
             <MessageTypingAnimation offset={2} />
           </View>
         ) : (
-          <Text
-            style={{
-              color: "#202020",
-              fontSize: 16,
-              lineHeight: 18,
-            }}
-          >
-            {text}
-          </Text>
+          <View>
+            <Text
+              style={{
+                color: "#202020",
+                fontSize: 16,
+                lineHeight: 18,
+              }}
+            >
+              {text}
+            </Text>
+
+            <Text
+              style={{
+                textAlign: "left",
+                color: "gray",
+                fontSize: 10,
+                lineHeight: 18,
+              }}
+            >
+              {formatTime(date)}
+            </Text>
+          </View>
         )}
       </View>
       <View style={{ flex: 1 }} />
@@ -167,7 +186,7 @@ function MessageTypingAnimation({ offset }) {
   );
 }
 
-function MessageBubbleMe({ text }) {
+function MessageBubbleMe({ text, date }) {
   return (
     <View
       style={{
@@ -196,7 +215,17 @@ function MessageBubbleMe({ text }) {
             lineHeight: 18,
           }}
         >
-          {text} 
+          {text}
+        </Text>
+        <Text
+          style={{
+            textAlign: "right",
+            color: "gray",
+            fontSize: 10,
+            lineHeight: 18,
+          }}
+        >
+          {formatTime(date)}
         </Text>
       </View>
     </View>
@@ -245,11 +274,10 @@ function MessageInput({ message, setMessage, onSend }) {
 
 const Message = ({ route }) => {
   const { friend } = route.params;
-  const [chat_id, setChat_id] = useState(null);
   const { user } = useSelector((state) => state.user);
   const [message, setMessage] = useState("");
 
-  const { messagesList, friends } = useSelector((state) => state.chat);
+  const { messagesList, friends, chat_id } = useSelector((state) => state.chat);
   const dispatch = useDispatch();
 
   // console.log(messagesList)
@@ -280,12 +308,12 @@ const Message = ({ route }) => {
       });
 
       const inputData = { from: user?._id, to: friend?._id };
-      if (chat_id === null) {
-        socket.emit("get_messages", { inputData }, (data) => {
-          setChat_id(data?.chat_id);
-          dispatch(responseMessageList(data));
-        });
-      }
+      // if (chat_id === null) {
+      //   socket.emit("get_messages", { inputData }, (data) => {
+      //     setChat_id(data?.chat_id);
+      //   });
+      // }
+      dispatch(ResponseMessageList({ inputData }));
     }
     return () => {
       socket?.off("new_message");
@@ -306,20 +334,6 @@ const Message = ({ route }) => {
     };
     socket.emit("text_message", { toSend });
     setMessage("");
-
-    const friendIndex = friends.findIndex(
-      (item) => item.friend.username === username
-    );
-    if (friendIndex >= 0) {
-      const item = friendList[friendIndex];
-      item.preview = data.message.text;
-      item.updated = data.message.created;
-      friendList.splice(friendIndex, 1);
-      friendList.unshift(item);
-      set((state) => ({
-        friendList: friendList,
-      }));
-    }
   }
 
   function onType(value) {

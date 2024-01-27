@@ -25,7 +25,11 @@ const Friend = ({ friend, chat_id }) => {
           source={{ uri: friend?.picture }}
           className="h-[40px] w-[40px] rounded-full mr-3"
         />
+        <View>
+
         <Text className="text-[16px] font-intermedium">{friend?.username}</Text>
+        {}
+        </View>
       </View>
     </Pressable>
   );
